@@ -4,10 +4,16 @@ import time
 
 
 def draw(x1, x2):
-    ln = plt.plot(x1, x2)
-    plt.pause(0.0001)
+    ln = ax[0].plot(x1, x2)
+    plt.pause(0.00001)
     ln[0].remove()
 
+def draw_error (error_number, t):
+    #ln = ax[0].plot(x1, x2)
+   # plt.pause(0.00001)
+   # ln[0].remove()
+    print (t)
+    ax[1].scatter(t, error_number)
 
 def sigmoid(score):
     return 1 / (1 + np.exp(-score))
@@ -22,7 +28,9 @@ def calculate_error(line_parameters, points, y):
 
 def gradient_descent(line_parameters, points, y, alpha):
     m = points.shape[0]
-    for i in range(2000):
+    error_list = [1]
+    t=0
+    for i in range(100):
         p = sigmoid(all_points * line_parameters)
         gradient = (points.transpose() * (p - y)) * (alpha / m)
         line_parameters = line_parameters - gradient
@@ -32,10 +40,14 @@ def gradient_descent(line_parameters, points, y, alpha):
         x1 = np.array([points[:, 0].min(), points[:, 0].max()])
         x2 = - b / w2 + x1 * (-w1 / w2)
         draw(x1, x2)
-        print(calculate_error(line_parameters,points, y))
-        error = calculate_error(line_parameters,points, y)
-
-
+        print(calculate_error(line_parameters, points, y))
+        error = calculate_error(line_parameters, points, y)
+        error_number = error[0,0]
+        t += 1
+        error_list.append(error_number)
+        draw_error(error_number, t)
+    ln = ax[0].plot(x1, x2)
+    return error_list
 
 
 n_pts = 100
@@ -49,10 +61,18 @@ line_parameters = np.matrix([np.zeros(3)]).transpose()
 # x2 = - b / w2 + x1 * (-w1/w2)
 y = np.array([np.zeros(n_pts), np.ones(n_pts)]).reshape(n_pts * 2, 1)
 
-_, ax = plt.subplots(figsize=(4, 4))
-ax.scatter(top_region[:, 0], top_region[:, 1], color='r')
-ax.scatter(bottom_region[:, 0], bottom_region[:, 1], color='b')
-gradient_descent(line_parameters, all_points, y, 0.06)
-plt.show()
+_, ax = plt.subplots(1,2)
+ax[0].scatter(top_region[:, 0], top_region[:, 1], color='r')
+ax[0].scatter(bottom_region[:, 0], bottom_region[:, 1], color='b')
+ax[0].title.set_text("Linear Regression")
+ax[1].title.set_text("Error")
+error_record = gradient_descent(line_parameters, all_points, y, 0.06)
+#plt.show()
 
-print(calculate_error(line_parameters, all_points, y))
+#_, ax2 = plt.subplots(figsize=(4, 4))
+#t = range(101)
+#print(error_record)
+#print(t)
+#ax[1].plot(t, error_record)
+plt.show()
+#print(calculate_error(line_parameters, all_points, y))
